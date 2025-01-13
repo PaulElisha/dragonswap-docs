@@ -145,6 +145,13 @@ liquidity = params.liquidityDelta < 0
                     ? liquidity - uint128(-params.liquidityDelta)
                     : liquidity + uint128(params.liquidityDelta);
 ```
+This checks if the liquidityDelta is negative, but if otherwise, it is positive, then it should add liquidityDelta.
+
+It is the same logic used here:
+
+```solidity
+liquidity = LiquidityMath.addDelta(liquidityBefore, params.liquidityDelta);
+```
 
 ```solidity
 function _modifyPosition(ModifyPositionParams memory params)
@@ -243,6 +250,7 @@ Then the position info is updated with the liquidityDelta, fees etc.
 ```
 
 - if liquidityDelta is not zero, let's update the liquidityNext (_self.liquidity + liquidityDelta) as the current position liquidity.
+
 ```solidity
 // update the position
         if (liquidityDelta != 0) self.liquidity = liquidityNext;

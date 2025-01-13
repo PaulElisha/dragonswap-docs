@@ -1,4 +1,4 @@
-# Dragonswap V2 Overview
+# Adding Liquidity
 
 Unlike in Dragonswap V2, there is no router contract to interact with the pool. Dragonswap V2 is a composable code, modularized for different purposes. Similar to the router contract in V2, the periphery contains code for different interaction purposes.
 

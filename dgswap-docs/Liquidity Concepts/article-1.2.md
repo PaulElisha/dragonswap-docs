@@ -60,11 +60,11 @@ By leveraging Q notation and fixed-point arithmetic, Dragonswap V2 achieves:
 
 
 
-Granular control over decimal precision, preserving accuracy in mathematical operations.
+- Granular control over decimal precision, preserving accuracy in mathematical operations.
 
 
 
-Efficient bit usage, optimizing storage and computational overhead.
+- Efficient bit usage, optimizing storage and computational overhead.
 
 This design highlights Dragonswap’s commitment to precision and performance, particularly in handling complex calculations for liquidity provision and trading operations.
 

@@ -338,4 +338,20 @@ library UniswapV3Helpers {
 
         priceImpact = FullMath.mulDiv(priceDifference, 1e6, sqrtPriceP);
     }
+
+    function calculateNextTicks(
+        uint160 currentPrice,
+        uint24 tickSpacing
+    ) private pure returns (int24 lowerTick, int24 upperTick) {
+        int24 currentTick = TickMath.getTickAtSqrtPrice(currentPrice);
+
+        lowerTick = (currentTick / int24(tickSpacing)) * int24(tickSpacing);
+
+        upperTick = lowerTick + int24(tickSpacing);
+
+        require(
+            upperTick > lowerTick,
+            "Upper tick must be greater than lower tick"
+        );
+    }
 }

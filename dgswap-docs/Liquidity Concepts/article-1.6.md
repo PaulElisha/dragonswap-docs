@@ -1,6 +1,6 @@
 # Adding Liquidity
 
-Unlike in Dragonswap V2, there is no router contract to interact with the pool. Dragonswap V2 is a composable code, modularized for different purposes. Similar to the router contract in V2, the periphery contains code for different interaction purposes.
+Unlike in Dragonswap V1, there is no router contract to interact with the pool. Dragonswap V2 is a composable code, modularized for different purposes. Similar to the V1, the periphery contains code for different interaction purposes.
 
 ```solidity
 struct AddLiquidityParams {
@@ -59,9 +59,11 @@ function addLiquidity(AddLiquidityParams memory params)
 
 For reference, see LiquidityManagement.sol.
 
-The pool address is gotten using the pool parameter or pool key and computed using create2.
+- It gets the pool address using the pool parameter or pool key and computed using create2.
 
-The current pool price is used to check if the pool is in the specified range and it mints the minimum liquidity.
+- The current pool price is used to sepcify where liqudity wants to provided to and to check if the pool is in the specified price range.
+
+- The liquidity when adding an amount of either tokens is returned and the minimum is minted as the liquidity using the function below. It is the same as liquidityDelta in the `mint()` function.
 
 ```solidity
 function getLiquidityForAmounts(
@@ -86,9 +88,9 @@ function getLiquidityForAmounts(
 }
 ```
 
-The mint function creates a position using the modifyPosition function.
+The mint function calls `modifyPosition()`.
 
-It also returns the amount of both tokens deposited which is derived from the computed liquidity, which is then compared against the pool's reserves or balances.
+It also returns the amountDelta, which is the amount equivalent to add the liquidityDelta specified, of both tokens deposited to confirm that there was actually an increase in the tokens balances.
 
 ```solidity
 function mint(
@@ -124,15 +126,25 @@ function mint(
 }
 ```
 
+The `modifyPosition()` function also calls `updatePosition()` function.
+
 In Dragonswap V2, when liquidity is provided, a position is created which can later be modified or updated.
 
 The checkTick function checks the tick to determine valid tick.
 
-Checks if the liquidity computed is not zero and if the current pool's tick is not in the specified range.
+Checks if the liquidity computed which is the liquidityDelta, the liquidity to add, is not zero and if the current pool's tick is in the extreme range. Then it returns the amount0 equivalent for the liquidityDelta to add since the other token have been swapped out.
 
-If it's true, then it checks if current pool's tick is in range by comparing against the upper bound tick.
+Then it checks if current pool's tick is in range by comparing against the upper bound tick.
 
-The computed liquidity (liquidityDelta) is added to the liquidity before; that is what it means to modify a position. In case the liquidity before is zero, a new position is created.
+If it is, the computed liquidity (liquidityDelta) is added to the current pool's liquidity ; that is what it means to modify a position.
+
+Before adding liquidityDelta to the current pool's liquidity, we could also make a conditional check like this:
+
+```solidity
+liquidity = params.liquidityDelta < 0
+                    ? liquidity - uint128(-params.liquidityDelta)
+                    : liquidity + uint128(params.liquidityDelta);
+```
 
 ```solidity
 function _modifyPosition(ModifyPositionParams memory params)
@@ -202,3 +214,116 @@ function _modifyPosition(ModifyPositionParams memory params)
         }
     }
 }
+```
+
+The `updatePosition()` function updates the user's position first before updating the tick where liquidity was added.
+
+In Dragonswap V2, when liqudity is provided, a position is created for thee user which can be updated and modified.
+
+So, first we get the position we want to update. A position ID is the hash of the owner, tickLower and tickUpper. If need be to update position, the tickLower and tickUpper would change but while adding liquidity the tickLower and tickUpper specified make up the position. It returns the position info which contains the liquidityDelta added, fees and other info.
+
+Reference link.
+
+Then we check if the liquidity we want to add, the liquidityDelta is not zero then we update the tick.
+
+Tick update is necessary because liquidity is in ticks, and if we would later modify the position, we would get the previous ticks to remove or burn liqudity. The tick update returns a boolean 'flipped' which is true when the total liquidity gets activated from 0 to liquidityDelta or false when the total liquidity is deactivated from liquidityDelta to 0.
+
+Then the position info is updated with the liquidityDelta, fees etc.
+
+- checks if the liquidityDelta to add is zero, it ensures that the previous liquidity is returned as the liquidityNext. Otherwise, the liquidityNext is the addition of the previous liquidity and the current liquidityDelta.
+
+```solidity
+        uint128 liquidityNext;
+        if (liquidityDelta == 0) {
+            require(_self.liquidity > 0, 'NP'); // disallow pokes for 0 liquidity positions
+            liquidityNext = _self.liquidity;
+        } else {
+            liquidityNext = LiquidityMath.addDelta(_self.liquidity, liquidityDelta);
+        }
+```
+
+- if liquidityDelta is not zero, let's update the liquidityNext (_self.liquidity + liquidityDelta) as the current position liquidity.
+```solidity
+// update the position
+        if (liquidityDelta != 0) self.liquidity = liquidityNext;
+```
+
+Reference link
+
+```solidity
+function _updatePosition(
+        address owner,
+        int24 tickLower,
+        int24 tickUpper,
+        int128 liquidityDelta,
+        int24 tick
+    ) private returns (Position.Info storage position) {
+        position = positions.get(owner, tickLower, tickUpper);
+
+        uint256 _feeGrowthGlobal0X128 = feeGrowthGlobal0X128; // SLOAD for gas optimization
+        uint256 _feeGrowthGlobal1X128 = feeGrowthGlobal1X128; // SLOAD for gas optimization
+
+        // if we need to update the ticks, do it
+        bool flippedLower;
+        bool flippedUpper;
+        if (liquidityDelta != 0) {
+            uint32 time = _blockTimestamp();
+            (int56 tickCumulative, uint160 secondsPerLiquidityCumulativeX128) =
+                observations.observeSingle(
+                    time,
+                    0,
+                    slot0.tick,
+                    slot0.observationIndex,
+                    liquidity,
+                    slot0.observationCardinality
+                );
+
+            flippedLower = ticks.update(
+                tickLower,
+                tick,
+                liquidityDelta,
+                _feeGrowthGlobal0X128,
+                _feeGrowthGlobal1X128,
+                secondsPerLiquidityCumulativeX128,
+                tickCumulative,
+                time,
+                false,
+                maxLiquidityPerTick
+            );
+            flippedUpper = ticks.update(
+                tickUpper,
+                tick,
+                liquidityDelta,
+                _feeGrowthGlobal0X128,
+                _feeGrowthGlobal1X128,
+                secondsPerLiquidityCumulativeX128,
+                tickCumulative,
+                time,
+                true,
+                maxLiquidityPerTick
+            );
+
+            if (flippedLower) {
+                tickBitmap.flipTick(tickLower, tickSpacing);
+            }
+            if (flippedUpper) {
+                tickBitmap.flipTick(tickUpper, tickSpacing);
+            }
+        }
+
+        (uint256 feeGrowthInside0X128, uint256 feeGrowthInside1X128) =
+            ticks.getFeeGrowthInside(tickLower, tickUpper, tick, _feeGrowthGlobal0X128, _feeGrowthGlobal1X128);
+
+        position.update(liquidityDelta, feeGrowthInside0X128, feeGrowthInside1X128);
+
+        // clear any tick data that is no longer needed
+        if (liquidityDelta < 0) {
+            if (flippedLower) {
+                ticks.clear(tickLower);
+            }
+            if (flippedUpper) {
+                ticks.clear(tickUpper);
+            }
+        }
+    }
+```

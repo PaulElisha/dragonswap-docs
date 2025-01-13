@@ -1,10 +1,10 @@
 # Price Curve in Dragonswap V2
 
-Dragonswap V2 introduces a more efficient model for liquidity distribution compared to Dragonswap V2. In V2, liquidity is spread across all price points in the price curve according to the constant product formula, ( x \times y = k ), where x is the reserve of token A, y is the reserve of token B, and k is a constant representing the pool's liquidity, making liquidity even. This means that liquidity is available at all price points, from the minimum 0 to the maximum ∞.
+Dragonswap V2 introduces a more efficient model for liquidity distribution compared to Dragonswap V2. In V1, liquidity is spread across all price points in the price curve according to the constant product formula, ( x \times y = k ), where x is the reserve of token A, y is the reserve of token B, and k is a constant representing the pool's liquidity, making liquidity even. This means that liquidity is available at all price points, from the minimum 0 to the maximum ∞.
 
 However, this approach results in inefficient use of liquidity, especially at price points where there is little to no trading activity. For example, liquidity is available at extreme high and low prices, but it’s unlikely that trades will occur there. This inefficiency is what led to the creation of Dragonswap V2's concentrated liquidity model.
 
-Dragonswap V2 introduces a price curve which models that of Dragonswap V2 but with a key difference: liquidity is not evenly distributed across all price ranges. This is because a Dragonswap V2 pool is divided into ticks which bounds price forming a mini v2-pool. So liquidity is only distributed in a specific price range according to the constant product formula, ( x \times y = k ), where x is the reserve of token A, y is the reserve of token B, and k is a constant. This makes liquidity usage more capital-efficient by ensuring that liquidity is focused on price ranges with higher trading activity, rather than being spread thin across all possible prices. The essence of this is that in a V2 pool, since price has been distributed, the amount traded at a specific price point does not reflect the liquidity deposited but in a V2 pool the amount traded in a V2 pool reflects the liquidity deposited making it concentrated.
+Dragonswap V2 introduces a price curve which models that of Dragonswap V1 but with a key difference: liquidity is not evenly distributed across all price ranges. This is because a Dragonswap V2 pool is divided into ticks which bounds price forming a mini v2-pool. So liquidity is only distributed in a specific price range according to the constant product formula, ( x \times y = k ), where x is the reserve of token A, y is the reserve of token B, and k is a constant. This makes liquidity usage more capital-efficient by ensuring that liquidity is focused on price ranges with higher trading activity, rather than being spread thin across all possible prices. The essence of this is that in a V1 pool, since price has been distributed, the amount traded at a specific price point does not reflect the liquidity deposited but in a V2 pool the amount traded in a V2 pool reflects the liquidity deposited making it concentrated.
 
 ## Difference Between Dragonswap V2 Price Curve and Dragonswap V2 Virtual Curve
 
@@ -44,15 +44,74 @@ Efficiency: V2's virtual curve enables liquidity providers to concentrate their 
 
 ## Liquidity in Dragonswap V2
 
-Like I said earlier that in a V2 pool, liquidity is evenly distributed across all price points in a price curve from 0 to ∞, so liquidity is always at the current price but the amount of assets traded at a specific price doesn’t necessarily reflect the actual liquidity deposited. When swap occur the amount of liquidity is determined if either of the reserve is near depletion (where price is at extreme).
+Like I said earlier that in a V1 pool, liquidity is evenly distributed across all price points in a price curve from 0 to ∞, so liquidity is always at the current price but the amount of assets traded at a specific price doesn’t necessarily reflect the actual liquidity deposited. When swap occur the amount of liquidity is determined if either of the reserve is near depletion (where price is at extreme).
 
 In contrast, a Dragonswap V2 pool is segmented into bounds of tick and liquidity exists in a price range. If price is at the extreme (where the range is either token is near depletion) then the amount of liquidity can be denominated in token B and vice versa but if price is not at the extreme, the amount of liquidity is in both tokens.
+
+In the code below, `liquidityDelta` is the liquidity we want to either provide to the pool or remove from the pool. But then as said that extreme prices determine the amount of liquidity as liquidity could be denominated in either both tokens, token0 or token1.
+
+The extreme prices was determined by checking if the current pool tick is outside the Lowertick, that is when price is at the extreme, liqudity will be denominated in token0 and that is why we could only get amount0 out as the optimal amount of liqudityDelta to add if price reaches that point, and vice versa if price is outside the Uppertick, we can only get the optimal amount of tokens to provide.
+
+The middle ground is we can get an optimal amount of token0 and token1 to provide should be equivalent to liquidityDelta if liquidity is not at extreme prices.
+
+See the code below:
+
+```solidity
+if (params.liquidityDelta != 0) {
+            if (_slot0.tick < params.tickLower) {
+                // current tick is below the passed range; liquidity can only become in range by crossing from left to
+                // right, when we'll need _more_ token0 (it's becoming more valuable) so user must provide it
+                amount0 = SqrtPriceMath.getAmount0Delta(
+                    TickMath.getSqrtRatioAtTick(params.tickLower),
+                    TickMath.getSqrtRatioAtTick(params.tickUpper),
+                    params.liquidityDelta
+                );
+            } else if (_slot0.tick < params.tickUpper) {
+                // current tick is inside the passed range
+                uint128 liquidityBefore = liquidity; // SLOAD for gas optimization
+
+                // write an oracle entry
+                (slot0.observationIndex, slot0.observationCardinality) = observations.write(
+                    _slot0.observationIndex,
+                    _blockTimestamp(),
+                    _slot0.tick,
+                    liquidityBefore,
+                    _slot0.observationCardinality,
+                    _slot0.observationCardinalityNext
+                );
+
+                amount0 = SqrtPriceMath.getAmount0Delta(
+                    _slot0.sqrtPriceX96,
+                    TickMath.getSqrtRatioAtTick(params.tickUpper),
+                    params.liquidityDelta
+                );
+                amount1 = SqrtPriceMath.getAmount1Delta(
+                    TickMath.getSqrtRatioAtTick(params.tickLower),
+                    _slot0.sqrtPriceX96,
+                    params.liquidityDelta
+                );
+
+                liquidity = LiquidityMath.addDelta(liquidityBefore, params.liquidityDelta);
+            } else {
+                // current tick is above the passed range; liquidity can only become in range by crossing from right to
+                // left, when we'll need _more_ token1 (it's becoming more valuable) so user must provide it
+                amount1 = SqrtPriceMath.getAmount1Delta(
+                    TickMath.getSqrtRatioAtTick(params.tickLower),
+                    TickMath.getSqrtRatioAtTick(params.tickUpper),
+                    params.liquidityDelta
+                );
+            }
+```
+
+Reference link.
+
+If a swap is to occur at the extreme prices, we can see that the amount in the pool is the total amount deposited but denominated in token0 or token1. Since upon swaps, the other token depletes till it gets to the point where trading could no longer occur.
 
 ## Extreme Prices
 
 The price when either of the tokens in a pool is near depletion when swap occur.
 
-Example:
+### Example:
 
 If 10,000 DAI and 10 ETH is available in ETH/DAI pool. 
 
@@ -66,7 +125,7 @@ As a result of swap, if the amount of ETH depletes to 5 ETH, the price of ETH in
 
 The amount of liquidity ( x and y) at an extreme price determine the trading that can happen.
 
-This is exactly how liquidity works in Dragonswap V2; but extreme prices are defined in bounds in a price range (lower and upper bound). Unlike in the Dragonswap V2, the pool’s reserve determines the natural bound for trading because it is not fragmented into ticks, the extreme prices that determine trading are determined implicitly by the constant product function (x * y = k).
+This is exactly how liquidity works in Dragonswap V2; but extreme prices are defined in bounds in a price range (lower and upper bound). Unlike in the Dragonswap V1, the pool’s reserve determines the natural bound for trading because it is not fragmented into ticks, the extreme prices that determine trading are determined implicitly by the constant product function (x * y = k).
 
 The V2 bounds are - the lower and upper bound.
 
@@ -210,7 +269,7 @@ If the price approaches the boundaries of a liquidity range, the pool's ability 
 
 In Dragonswap V2, liquidity is determined both from virtual reserves and real reserves. Both approaches should yield the same liquidity calculation, but the methods differ in terms of how they handle price ranges and the liquidity behavior at different price levels.
 
-1. Liquidity from Virtual Reserves
+- Liquidity from Virtual Reserves
 
 Liquidity based on virtual reserves simulates how liquidity behaves at different price points, even in ranges where liquidity has not yet been provided by liquidity providers. This approach models the distribution of liquidity across price ranges.
 
@@ -232,7 +291,7 @@ Where:
 
 The virtual reserves are determined by the current price ( p' ), the lower price bound ( p_l ), and the upper price bound ( p_u ). These virtual reserves simulate liquidity behavior and how much liquidity would be available if the price moved into that range.
 
-2. Liquidity from Real Reserves
+-  Liquidity from Real Reserves
 
 Liquidity based on real reserves is calculated using the actual reserves of tokens that liquidity providers have deposited in the pool. This formula calculates the liquidity available within a specific price range.
 
@@ -298,7 +357,7 @@ Where:
 
 The liquidity calculation in Dragonswap V2 can be done using both real reserves and virtual reserves, with the following formulas:
 
-1. Liquidity Formula Using Virtual Reserves:
+- Liquidity Formula Using Virtual Reserves:
 
 The liquidity ( L ) in a given price range is determined by the virtual reserves of token X and token Y. This can be expressed as:
 
@@ -312,7 +371,7 @@ Where:
 
 ( x_{\text{virtual}} ) and ( y_{\text{virtual}} ) are the virtual reserves for token X and token Y, respectively, at the current price.
 
-The relationship between the virtual reserves and the real reserves is as follows:
+``The relationship between the virtual reserves and the real reserves is as follows:``
 
 \[
 L^2 = x_{\text{virtual}} \times y_{\text{virtual}}
@@ -342,7 +401,7 @@ When expanded, the relationship becomes:
 
 [ L^2 = \left( x_{\text{real}} + \frac{L}{\sqrt{p_b}} \right) \times \left( y_{\text{real}} + L \sqrt{p_a} \right) ]
 
-2. Liquidity When Token X is Deposited:
+- Liquidity When Token X is Deposited:
 
 When token X is deposited in the liquidity pool, the liquidity ( L ) for token X within a specific price range can be calculated as:
 
@@ -397,7 +456,7 @@ Where:
 
 For a better implementation, refer to the LiquidityAmounts.sol library in the Dragonswap V2 Core repository.
 
-3. Amount of Token X Deposited:
+`Amount of Token X Deposited:`
 
 To determine how much of token X is deposited for a given liquidity ( L ), we use the formula:
 
@@ -425,7 +484,7 @@ To determine how much of token X is deposited for a given liquidity ( L ), we us
 
 For a better implementation, refer to the LiquidityAmounts.sol library in the Dragonswap V2 Core repository.
 
-4. Amount of Token Y Deposited:
+- Amount of Token Y Deposited:
 
 Similarly, to determine how much of token Y is deposited for a given liquidity ( L ), we use:
 
@@ -444,7 +503,7 @@ Similarly, to determine how much of token Y is deposited for a given liquidity (
 
 For a better implementation, refer to the LiquidityAmounts.sol library in the Dragonswap V2 Core repository.
 
-5. Liquidity When Token Y is Deposited:
+- Liquidity When Token Y is Deposited:
 
 When token Y is deposited, the liquidity ( L ) for token Y within a specific price range can be calculated as:
 
@@ -478,7 +537,7 @@ For a better implementation, refer to the LiquidityAmounts.sol library in the Dr
 
 These formulas allow for calculating liquidity within a specific price range for both token X and token Y, depending on whether the liquidity is being calculated using real or virtual reserves.
 
-Note: The same expression used to calculate the amount of tokens deposited is used to get the delta amounts.
+Note: The same expression used to calculate the amount of tokens deposited is used to get the delta amounts. The difference is that it rounds up and is good for swap if we want to get the amountIn, we will go into the details in the swap section.
 
 ```solidity
     function getAmount0Delta(

@@ -1,4 +1,4 @@
-
+# Tick and Tick Spacing
 
 Ticks are discrete points along the price range in a Dragonswap V2 pool. They serve multiple purposes:
 
@@ -12,11 +12,11 @@ Define specific price ranges for liquidity.
 
 Determine if liquidity is active based on whether the pool's current price falls within a selected tick or tick range.
 
-Role of Ticks in Dragonswap V2
+## Role of Ticks in Dragonswap V2
 
 In Dragonswap V2, liquidity is distributed uniformly across the entire price curve, which reduces capital efficiency. In contrast, Dragonswap V2 allows liquidity providers (LPs) to concentrate their liquidity within specific price ranges, creating mini-pools (equivalent to V2-like pools) at each price range. These mini-pools improve capital efficiency by ensuring liquidity is active only within the selected price range.
 
-Tick Representation
+## Tick Representation
 
 A tick is a specific value used to represent a price point in a pool. To calculate the price corresponding to a particular tick:
 [ \text{Price} = 1.001^{\text{tick}} ]
@@ -39,6 +39,7 @@ sqrtPriceX96: Represents the square root of the price scaled to 96 bits for high
 
 Both methods are valid, but their usage depends on the specific context within the pool.
 
+```solidity
     function tickToPrice(int24 tick) internal pure returns (uint160 price) {
         // The function `getSqrtRatioAtTick` in Dragonswap V2 is conceptually related to calculating the price at a given tick, but it serves a different purpose and operates differently compared to the simpler `tickToPrice` function provided. Here's how they differ and align:
 
@@ -85,10 +86,11 @@ Both methods are valid, but their usage depends on the specific context within t
         // Adjust for precision
         return result * 1e18 + (x * 1e18) / base;
     }
+```
 
 For a better implementation, refer to the TickMath.sol library in the Dragonswap V2 Core repository.
 
-Deriving Tick from Price in Dragonswap V2
+## Deriving Tick from Price in Dragonswap V2
 
 In Dragonswap V2, the tick represents a discrete price point and can also be calculated from the price. The price-tick relationship is as follows:
 [ \text{Price} = 1.0001^{\text{tick}} ]
@@ -123,6 +125,7 @@ The price can be computed as:
 Deriving the Tick:
 Rearranging the formula for price, the tick is calculated by taking the logarithm of the squared ratio of sqrtPriceX96 to (Q96) and dividing it by the logarithm of (1.0001).
 
+```solidity
     function priceToTick(
         uint160 sqrtPriceX96
     ) public pure returns (int24 tick) {
@@ -143,10 +146,11 @@ Rearranging the formula for price, the tick is calculated by taking the logarith
         int256 result = int256(logPrice / logBase);
         tick = int24(result);
     }
+```
 
 For a better implementation, refer to the TickMath.sol library in the Dragonswap V2 Core repository.
 
-Ticks and Price Ranges in Dragonswap V2
+## Ticks and Price Ranges in Dragonswap V2
 
 Ticks divide the entire price curve into discrete steps, creating defined price ranges. Each tick corresponds to a specific price point, calculated as:
 [ \text{Price at Tick (t)} = 1.0001^t ]
@@ -216,7 +220,7 @@ By concentrating liquidity in active price ranges, ticks minimize capital ineffi
 
 This reduces fragmented liquidity, making trading more efficient.
 
-Tick-Spacing in Dragonswap V2
+# Tick-Spacing in Dragonswap V2
 
 Tick-spacing refers to the interval between two ticks, which defines the granularity of price ranges in a Dragonswap V2 pool. When a pool is created, it is initialized with a specific tick-spacing, determining the space between two consecutive ticks. This interval specifies where liquidity can be added or removed and directly affects the precision of price ranges.
 

@@ -19,7 +19,7 @@ Reserve of Token B (Y): 500
 Price of Token A in terms of Token B:
 [ \text{Price} = \frac{Y}{X} = \frac{500}{1000} = 0.5 ]
 
-sqrtPrice and sqrtPriceX96 in Dragonswap V2
+## sqrtPrice and sqrtPriceX96 in Dragonswap V2
 
 Dragonswap V2 uses the square root of the price (sqrtPrice) for efficient and precise computation.
 

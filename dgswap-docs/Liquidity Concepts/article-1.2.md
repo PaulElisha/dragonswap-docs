@@ -68,7 +68,7 @@ Efficient bit usage, optimizing storage and computational overhead.
 
 This design highlights Dragonswap’s commitment to precision and performance, particularly in handling complex calculations for liquidity provision and trading operations.
 
-Q Notation  Further Explanation
+## Q Notation  Further Explanation
 
 In Q notation, numbers are represented as fixed-point values by allocating specific bits to the integer and fractional parts:
 

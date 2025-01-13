@@ -265,4 +265,3 @@ The price range between these two ticks would be:
 
 This defines the interval in which liquidity can be added or removed within the pool.
 
-Price Curve in Dragonswap V2

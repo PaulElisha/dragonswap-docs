@@ -1,3 +1,5 @@
+# Dragonswap V2
+
 Dragonswap V2 significantly enhances capital efficiency by introducing individualized price curves for liquidity providers (LPs). Unlike Dragonswap V2, where liquidity is distributed uniformly across a price curve for a general pool, Dragonswap V2 allows LPs to concentrate their liquidity within specific price ranges. This means users can provide liquidity at precise price points, maximizing its utilization and earning potential.
 
 In Dragonswap V2, trades occur against the combined liquidity available at a specific price point. If the market price moves outside the defined range of a user's liquidity position, that liquidity is no longer active unless the user adjusts it to the new price range. This dynamic feature ensures efficient allocation of capital.

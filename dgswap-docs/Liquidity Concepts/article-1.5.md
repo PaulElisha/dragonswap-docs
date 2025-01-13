@@ -1,4 +1,4 @@
-
+# Price Curve in Dragonswap V2
 
 Dragonswap V2 introduces a more efficient model for liquidity distribution compared to Dragonswap V2. In V2, liquidity is spread across all price points in the price curve according to the constant product formula, ( x \times y = k ), where x is the reserve of token A, y is the reserve of token B, and k is a constant representing the pool's liquidity, making liquidity even. This means that liquidity is available at all price points, from the minimum 0 to the maximum ∞.
 

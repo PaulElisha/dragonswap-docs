@@ -1,4 +1,4 @@
-
+# Q Notation
 
 In Dragonswap V2, precision is critical to avoid issues like overflow and rounding errors. Variables requiring high accuracy are represented using 256-bit integers, ensuring they can handle large values without overflow. For example, if arithmetic operations are performed on smaller bit-sized variables, such as 8-bit or 16-bit integers, the risk of overflow increases when calculations exceed their maximum representable values.
 
@@ -8,7 +8,7 @@ To address this, Dragonswap V2 uses fixed-point arithmetic, which represents fra
 
 By combining 256-bit precision and fixed-point arithmetic, Dragonswap V2 ensures reliable and accurate handling of financial computations critical for its operations.
 
-Basics of Fixed-Point Arithmetic
+## Basics of Fixed-Point Arithmetic
 
 Fixed-point arithmetic is a method for representing fractional numbers as integers by using a fixed number of digits for both the integer and fractional parts. This is achieved through decimal scaling, which converts decimal numbers into integers by multiplying them by a scaling factor (e.g., (10^n), where (n) is the number of fractional digits).
 
@@ -26,12 +26,13 @@ For example:
 
 These scaled numbers can be stored as integers, ensuring precision by avoiding truncation of decimal parts. When applied to blockchain calculations, this approach eliminates rounding errors commonly associated with division operations that discard fractional components. By scaling numbers to fit within a fixed bit-size (e.g., 256 bits), both the integer and fractional parts are preserved, ensuring accuracy and compatibility with Solidity's computational constraints.
 
-Q Notation and Its Use in Dragonswap V2
+## Q Notation and Its Use in Dragonswap V2
 
 Dragonswap V2 employs Q notation, a fixed-point representation method, to maintain high precision using binary scaling instead of decimal scaling. Q notation allocates a specific number of bits for the integer and fractional parts of a number, enabling precise and efficient computations.
 
 An example in Dragonswap V2 is the slot0 struct, which includes the variable sqrtPriceX96. 
 
+```solidity
     struct Slot0 {
         // the current price
         uint160 sqrtPriceX96;
@@ -49,6 +50,7 @@ An example in Dragonswap V2 is the slot0 struct, which includes the variable sqr
         // whether the pool is locked
         bool unlocked;
     }
+```
 
 This variable represents the square root of the price ratio scaled using Q notation (specifically, Q96), where 96 bits are allocated to the fractional part. To ensure compactness and efficiency, sqrtPriceX96 is stored as a 160-bit variable, allowing the entire slot0 structure—along with other critical pool parameters—to fit within 32 bytes.
 
@@ -105,7 +107,7 @@ Combined Representation:
 Alternatively, you can calculate it directly:
 [1.5 \times 2^8 = 384.]
 
-Q96 in Dragonswap V2
+## Q96 in Dragonswap V2
 
 In Dragonswap V2, sqrtPriceX96 uses Q96 notation, where the fractional part is scaled by 96 bits, effectively shifting the decimal point far to the right. The total 256-bit representation is split as follows:
 

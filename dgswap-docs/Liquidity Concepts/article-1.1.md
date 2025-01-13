@@ -1,6 +1,6 @@
 
 
-Uniswap V3 introduces flexible fee tiers tailored to different types of trading pairs:
+Dragonswap V2 introduces flexible fee tiers tailored to different types of trading pairs:
 
 
 

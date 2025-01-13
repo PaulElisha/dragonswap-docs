@@ -1,6 +1,6 @@
 
 
-In Uniswap V2, the price of a token is determined by the quotient of token reserves in a liquidity pool.
+In Dragonswap V2, the price of a token is determined by the quotient of token reserves in a liquidity pool.
 
 Example: Calculating Price
 
@@ -19,9 +19,9 @@ Reserve of Token B (Y): 500
 Price of Token A in terms of Token B:
 [ \text{Price} = \frac{Y}{X} = \frac{500}{1000} = 0.5 ]
 
-sqrtPrice and sqrtPriceX96 in Uniswap V3
+sqrtPrice and sqrtPriceX96 in Dragonswap V2
 
-Uniswap V3 uses the square root of the price (sqrtPrice) for efficient and precise computation.
+Dragonswap V2 uses the square root of the price (sqrtPrice) for efficient and precise computation.
 
 
 
@@ -36,7 +36,7 @@ Convert sqrtPrice to sqrtPriceX96:
 [ \text{sqrtPriceX96} = \text{sqrtPrice} \times 2^{96}
 ]
 
-Reference link to Uniswap Q96
+Reference link to Dragonswap Q96
 
 	uint256 public constant Q96 = 0x100000000000000000000000000000000; // binary representation of Q96    
 

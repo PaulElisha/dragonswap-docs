@@ -1,14 +1,14 @@
 
 
-Uniswap V3 introduces a more efficient model for liquidity distribution compared to Uniswap V2. In V2, liquidity is spread across all price points in the price curve according to the constant product formula, ( x \times y = k ), where x is the reserve of token A, y is the reserve of token B, and k is a constant representing the pool's liquidity, making liquidity even. This means that liquidity is available at all price points, from the minimum 0 to the maximum ∞.
+Dragonswap V2 introduces a more efficient model for liquidity distribution compared to Dragonswap V2. In V2, liquidity is spread across all price points in the price curve according to the constant product formula, ( x \times y = k ), where x is the reserve of token A, y is the reserve of token B, and k is a constant representing the pool's liquidity, making liquidity even. This means that liquidity is available at all price points, from the minimum 0 to the maximum ∞.
 
-However, this approach results in inefficient use of liquidity, especially at price points where there is little to no trading activity. For example, liquidity is available at extreme high and low prices, but it’s unlikely that trades will occur there. This inefficiency is what led to the creation of Uniswap V3's concentrated liquidity model.
+However, this approach results in inefficient use of liquidity, especially at price points where there is little to no trading activity. For example, liquidity is available at extreme high and low prices, but it’s unlikely that trades will occur there. This inefficiency is what led to the creation of Dragonswap V2's concentrated liquidity model.
 
-Uniswap V3 introduces a price curve which models that of Uniswap V2 but with a key difference: liquidity is not evenly distributed across all price ranges. This is because a uniswap v3 pool is divided into ticks which bounds price forming a mini v2-pool. So liquidity is only distributed in a specific price range according to the constant product formula, ( x \times y = k ), where x is the reserve of token A, y is the reserve of token B, and k is a constant. This makes liquidity usage more capital-efficient by ensuring that liquidity is focused on price ranges with higher trading activity, rather than being spread thin across all possible prices. The essence of this is that in a V2 pool, since price has been distributed, the amount traded at a specific price point does not reflect the liquidity deposited but in a V3 pool the amount traded in a V3 pool reflects the liquidity deposited making it concentrated.
+Dragonswap V2 introduces a price curve which models that of Dragonswap V2 but with a key difference: liquidity is not evenly distributed across all price ranges. This is because a Dragonswap V2 pool is divided into ticks which bounds price forming a mini v2-pool. So liquidity is only distributed in a specific price range according to the constant product formula, ( x \times y = k ), where x is the reserve of token A, y is the reserve of token B, and k is a constant. This makes liquidity usage more capital-efficient by ensuring that liquidity is focused on price ranges with higher trading activity, rather than being spread thin across all possible prices. The essence of this is that in a V2 pool, since price has been distributed, the amount traded at a specific price point does not reflect the liquidity deposited but in a V2 pool the amount traded in a V2 pool reflects the liquidity deposited making it concentrated.
 
-Difference Between Uniswap V2 Price Curve and Uniswap V3 Virtual Curve
+Difference Between Dragonswap V2 Price Curve and Dragonswap V2 Virtual Curve
 
-The key difference between the Uniswap V2 Price Curve and the Uniswap V3 Virtual Curve lies in the distribution of liquidity across price ranges, and how liquidity is used during trades. Let’s break down these differences clearly:
+The key difference between the Dragonswap V2 Price Curve and the Dragonswap V2 Virtual Curve lies in the distribution of liquidity across price ranges, and how liquidity is used during trades. Let’s break down these differences clearly:
 
 Liquidity Distribution:
 
@@ -16,7 +16,7 @@ Liquidity Distribution:
 
 
 
-Uniswap V2 Price Curve:
+Dragonswap V2 Price Curve:
 
 
 
@@ -30,23 +30,23 @@ Inefficiency: Since liquidity is evenly spread across all prices, much of it is 
 
 
 
-Uniswap V3 Virtual Curve:
+Dragonswap V2 Virtual Curve:
 
 
 
 
 
-Liquidity Distribution: In V3, liquidity is concentrated within specific price ranges selected by liquidity providers. Instead of spreading liquidity across the entire curve, liquidity is only available within the price ranges that liquidity providers choose, making the system more capital-efficient.
+Liquidity Distribution: In V2, liquidity is concentrated within specific price ranges selected by liquidity providers. Instead of spreading liquidity across the entire curve, liquidity is only available within the price ranges that liquidity providers choose, making the system more capital-efficient.
 
 
 
-Efficiency: V3's virtual curve enables liquidity providers to concentrate their liquidity within a price range, which maximizes their capital efficiency and reduces the amount of capital needed to provide meaningful liquidity.
+Efficiency: V2's virtual curve enables liquidity providers to concentrate their liquidity within a price range, which maximizes their capital efficiency and reduces the amount of capital needed to provide meaningful liquidity.
 
-Liquidity in Uniswap V3
+Liquidity in Dragonswap V2
 
 Like I said earlier that in a V2 pool, liquidity is evenly distributed across all price points in a price curve from 0 to ∞, so liquidity is always at the current price but the amount of assets traded at a specific price doesn’t necessarily reflect the actual liquidity deposited. When swap occur the amount of liquidity is determined if either of the reserve is near depletion (where price is at extreme).
 
-In contrast, a Uniswap V3 pool is segmented into bounds of tick and liquidity exists in a price range. If price is at the extreme (where the range is either token is near depletion) then the amount of liquidity can be denominated in token B and vice versa but if price is not at the extreme, the amount of liquidity is in both tokens.
+In contrast, a Dragonswap V2 pool is segmented into bounds of tick and liquidity exists in a price range. If price is at the extreme (where the range is either token is near depletion) then the amount of liquidity can be denominated in token B and vice versa but if price is not at the extreme, the amount of liquidity is in both tokens.
 
 Extreme Prices
 
@@ -66,9 +66,9 @@ As a result of swap, if the amount of ETH depletes to 5 ETH, the price of ETH in
 
 The amount of liquidity ( x and y) at an extreme price determine the trading that can happen.
 
-This is exactly how liquidity works in Uniswap V3; but extreme prices are defined in bounds in a price range (lower and upper bound). Unlike in the Uniswap V2, the pool’s reserve determines the natural bound for trading because it is not fragmented into ticks, the extreme prices that determine trading are determined implicitly by the constant product function (x * y = k).
+This is exactly how liquidity works in Dragonswap V2; but extreme prices are defined in bounds in a price range (lower and upper bound). Unlike in the Dragonswap V2, the pool’s reserve determines the natural bound for trading because it is not fragmented into ticks, the extreme prices that determine trading are determined implicitly by the constant product function (x * y = k).
 
-The V3 bounds are - the lower and upper bound.
+The V2 bounds are - the lower and upper bound.
 
 
 The lower bound - where token X is always high and token Y is near zero.
@@ -79,7 +79,7 @@ The amount of assets available for trading near the boundaries matches the total
 
 Extreme Prices and Imbalance liquidity is one of the major causes of slippage. Slippage happens when a user wants to trade a tiny amount of asset at an extreme price in the lower range.
 
-The code below shows how V3 protect slippage:
+The code below shows how V2 protect slippage:
 
 // places a limit on the price to ensure that it doesn't cross to the extreme price
 
@@ -92,7 +92,7 @@ sqrtPriceLimitX96 < TickMath.MAX_SQRT_RATIO
 
 Reference link.
 
-If a developer integrating V3 in an application wants to control slippage, the code below works:
+If a developer integrating V2 in an application wants to control slippage, the code below works:
 
     // To protect slippage
     function calculateAmountOutMinimum(
@@ -105,7 +105,7 @@ If a developer integrating V3 in an application wants to control slippage, the c
     }
 
 function executeTradeWithSlippageProtection(
-        IUniswapV3Router router,
+        IDragonswapV2Router router,
         ExactInputSingleParams memory params,
         uint256 expectedPrice,
         uint16 slippageTolerance
@@ -200,9 +200,9 @@ As the price moves toward the upper bound, liquidity will be depleted in ETH, an
 
 If the price approaches the boundaries of a liquidity range, the pool's ability to facilitate trades diminishes because liquidity becomes scarce.
 
-Liquidity Amounts in Uniswap V3
+Liquidity Amounts in Dragonswap V2
 
-In Uniswap V3, liquidity is determined both from virtual reserves and real reserves. Both approaches should yield the same liquidity calculation, but the methods differ in terms of how they handle price ranges and the liquidity behavior at different price levels.
+In Dragonswap V2, liquidity is determined both from virtual reserves and real reserves. Both approaches should yield the same liquidity calculation, but the methods differ in terms of how they handle price ranges and the liquidity behavior at different price levels.
 
 1. Liquidity from Virtual Reserves
 
@@ -288,9 +288,9 @@ Where:
 
 ( p_u ) is the upper price bound of the range.
 
-Liquidity Calculation Formula in Uniswap V3
+Liquidity Calculation Formula in Dragonswap V2
 
-The liquidity calculation in Uniswap V3 can be done using both real reserves and virtual reserves, with the following formulas:
+The liquidity calculation in Dragonswap V2 can be done using both real reserves and virtual reserves, with the following formulas:
 
 1. Liquidity Formula Using Virtual Reserves:
 
@@ -308,13 +308,17 @@ Where:
 
 The relationship between the virtual reserves and the real reserves is as follows:
 
-[ L^2 = x \times y ]
+\[
+L^2 = x_{\text{virtual}} \times y_{\text{virtual}}
+\]
 
 Where ( x ) and ( y ) are the real reserves for token X and token Y, respectively.
 
 To determine the virtual reserves, we use:
 
-[ x_{\text{virtual}} = x_{\text{real}} + \frac{L}{\sqrt{p_b}} ] [ y_{\text{virtual}} = y_{\text{real}} + L \sqrt{p_a} ]
+\[
+x_{\text{virtual}} = x_{\text{real}} + \frac{L}{\sqrt{p_b}}
+\]
 
 Where:
 
@@ -383,7 +387,7 @@ Where:
         return x;
     }
 
-For a better implementation, refer to the LiquidityAmounts.sol library in the Uniswap V3 Core repository.
+For a better implementation, refer to the LiquidityAmounts.sol library in the Dragonswap V2 Core repository.
 
 3. Amount of Token X Deposited:
 
@@ -409,7 +413,7 @@ To determine how much of token X is deposited for a given liquidity ( L ), we us
         return (L * numerator) / denominator;
     }
 
-For a better implementation, refer to the LiquidityAmounts.sol library in the Uniswap V3 Core repository.
+For a better implementation, refer to the LiquidityAmounts.sol library in the Dragonswap V2 Core repository.
 
 4. Amount of Token Y Deposited:
 
@@ -426,7 +430,7 @@ Similarly, to determine how much of token Y is deposited for a given liquidity (
         return L * (pB - pA);
     }
 
-For a better implementation, refer to the LiquidityAmounts.sol library in the Uniswap V3 Core repository.
+For a better implementation, refer to the LiquidityAmounts.sol library in the Dragonswap V2 Core repository.
 
 5. Liquidity When Token Y is Deposited:
 
@@ -456,7 +460,7 @@ Where:
         return y / (pB - pA);
     }
 
-For a better implementation, refer to the LiquidityAmounts.sol library in the Uniswap V3 Core repository.
+For a better implementation, refer to the LiquidityAmounts.sol library in the Dragonswap V2 Core repository.
 
 These formulas allow for calculating liquidity within a specific price range for both token X and token Y, depending on whether the liquidity is being calculated using real or virtual reserves.
 

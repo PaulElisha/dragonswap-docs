@@ -1,6 +1,6 @@
 
 
-Unlike in Uniswap V2, there is no router contract to interact with the pool. Uniswap V3 is a composable code, modularized for different purposes. Similar to the router contract in V2, the periphery contains code for different interaction purposes.
+Unlike in Dragonswap V2, there is no router contract to interact with the pool. Dragonswap V2 is a composable code, modularized for different purposes. Similar to the router contract in V2, the periphery contains code for different interaction purposes.
 
     struct AddLiquidityParams {
         address token0;
@@ -22,13 +22,13 @@ Unlike in Uniswap V2, there is no router contract to interact with the pool. Uni
             uint128 liquidity,
             uint256 amount0,
             uint256 amount1,
-            IUniswapV3Pool pool
+            IDragonswapV2Pool pool
         )
     {
         PoolAddress.PoolKey memory poolKey =
             PoolAddress.PoolKey({token0: params.token0, token1: params.token1, fee: params.fee});
 
-        pool = IUniswapV3Pool(PoolAddress.computeAddress(factory, poolKey));
+        pool = IDragonswapV2Pool(PoolAddress.computeAddress(factory, poolKey));
 
         // compute the liquidity amount
         {
@@ -118,7 +118,7 @@ It also returns the amount of both tokens deposited which is derived from the co
         uint256 balance1Before;
         if (amount0 > 0) balance0Before = balance0();
         if (amount1 > 0) balance1Before = balance1();
-        IUniswapV3MintCallback(msg.sender).uniswapV3MintCallback(amount0, amount1, data);
+        IDragonswapV2MintCallback(msg.sender).DragonswapV2MintCallback(amount0, amount1, data);
         if (amount0 > 0) require(balance0Before.add(amount0) <= balance0(), 'M0');
         if (amount1 > 0) require(balance1Before.add(amount1) <= balance1(), 'M1');
 
@@ -126,7 +126,7 @@ It also returns the amount of both tokens deposited which is derived from the co
     }
 
 
-In Uniswap V3, when liquidity is provided, a position is created which can later be modified or updated.
+In Dragonswap V2, when liquidity is provided, a position is created which can later be modified or updated.
 
 
 

@@ -1,12 +1,12 @@
 
 
-In Uniswap V3, precision is critical to avoid issues like overflow and rounding errors. Variables requiring high accuracy are represented using 256-bit integers, ensuring they can handle large values without overflow. For example, if arithmetic operations are performed on smaller bit-sized variables, such as 8-bit or 16-bit integers, the risk of overflow increases when calculations exceed their maximum representable values.
+In Dragonswap V2, precision is critical to avoid issues like overflow and rounding errors. Variables requiring high accuracy are represented using 256-bit integers, ensuring they can handle large values without overflow. For example, if arithmetic operations are performed on smaller bit-sized variables, such as 8-bit or 16-bit integers, the risk of overflow increases when calculations exceed their maximum representable values.
 
 Rounding Challenges: Even with 256-bit variables, rounding issues can occur in division operations due to Solidity's inherent limitations with decimal precision. For instance, dividing 5 by 2 in Solidity will yield 2, as it truncates the decimal part, leading to loss of precision.
 
-To address this, Uniswap V3 uses fixed-point arithmetic, which represents fractional numbers as integers. This approach ensures precise calculations by eliminating rounding errors. For example, instead of directly handling decimals, a fractional value like 0.5 might be represented as 500,000 with a defined scaling factor, allowing accurate computation across operations.
+To address this, Dragonswap V2 uses fixed-point arithmetic, which represents fractional numbers as integers. This approach ensures precise calculations by eliminating rounding errors. For example, instead of directly handling decimals, a fractional value like 0.5 might be represented as 500,000 with a defined scaling factor, allowing accurate computation across operations.
 
-By combining 256-bit precision and fixed-point arithmetic, Uniswap V3 ensures reliable and accurate handling of financial computations critical for its operations.
+By combining 256-bit precision and fixed-point arithmetic, Dragonswap V2 ensures reliable and accurate handling of financial computations critical for its operations.
 
 Basics of Fixed-Point Arithmetic
 
@@ -26,11 +26,11 @@ For example:
 
 These scaled numbers can be stored as integers, ensuring precision by avoiding truncation of decimal parts. When applied to blockchain calculations, this approach eliminates rounding errors commonly associated with division operations that discard fractional components. By scaling numbers to fit within a fixed bit-size (e.g., 256 bits), both the integer and fractional parts are preserved, ensuring accuracy and compatibility with Solidity's computational constraints.
 
-Q Notation and Its Use in Uniswap V3
+Q Notation and Its Use in Dragonswap V2
 
-Uniswap V3 employs Q notation, a fixed-point representation method, to maintain high precision using binary scaling instead of decimal scaling. Q notation allocates a specific number of bits for the integer and fractional parts of a number, enabling precise and efficient computations.
+Dragonswap V2 employs Q notation, a fixed-point representation method, to maintain high precision using binary scaling instead of decimal scaling. Q notation allocates a specific number of bits for the integer and fractional parts of a number, enabling precise and efficient computations.
 
-An example in Uniswap V3 is the slot0 struct, which includes the variable sqrtPriceX96. 
+An example in Dragonswap V2 is the slot0 struct, which includes the variable sqrtPriceX96. 
 
     struct Slot0 {
         // the current price
@@ -52,7 +52,7 @@ An example in Uniswap V3 is the slot0 struct, which includes the variable sqrtPr
 
 This variable represents the square root of the price ratio scaled using Q notation (specifically, Q96), where 96 bits are allocated to the fractional part. To ensure compactness and efficiency, sqrtPriceX96 is stored as a 160-bit variable, allowing the entire slot0 structure—along with other critical pool parameters—to fit within 32 bytes.
 
-By leveraging Q notation and fixed-point arithmetic, Uniswap V3 achieves:
+By leveraging Q notation and fixed-point arithmetic, Dragonswap V2 achieves:
 
 
 
@@ -64,7 +64,7 @@ Granular control over decimal precision, preserving accuracy in mathematical ope
 
 Efficient bit usage, optimizing storage and computational overhead.
 
-This design highlights Uniswap’s commitment to precision and performance, particularly in handling complex calculations for liquidity provision and trading operations.
+This design highlights Dragonswap’s commitment to precision and performance, particularly in handling complex calculations for liquidity provision and trading operations.
 
 Q Notation  Further Explanation
 
@@ -105,9 +105,9 @@ Combined Representation:
 Alternatively, you can calculate it directly:
 [1.5 \times 2^8 = 384.]
 
-Q96 in Uniswap V3
+Q96 in Dragonswap V2
 
-In Uniswap V3, sqrtPriceX96 uses Q96 notation, where the fractional part is scaled by 96 bits, effectively shifting the decimal point far to the right. The total 256-bit representation is split as follows:
+In Dragonswap V2, sqrtPriceX96 uses Q96 notation, where the fractional part is scaled by 96 bits, effectively shifting the decimal point far to the right. The total 256-bit representation is split as follows:
 
 
 

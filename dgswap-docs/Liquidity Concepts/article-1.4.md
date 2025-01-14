@@ -229,7 +229,7 @@ It includes:
 - Tick Info: details about a particular tick.
 
 liquidityGross - total liquidity in a tick.
-liquidityNet - the liquidity added or removed from that tick.
+liquidityNet - the liquidity added or removed from that tick. When liquidity is added to the lowerTick, it adds a liquidityNet that is positive, otherwise it removes a liquidityNet that is negative at the upperTick. It is the amount of tokens between a price range as the price changess.
 initialized - whether the tick is activated or not. It is based on whether the liquidityGross is 0
 
 ```solidity
@@ -294,7 +294,9 @@ If liqudityGrossBefore is zero, that is the liquidity hasn't been initialized be
         }    
 ```
 
-Otherwise, it updates the liquidityGrossAfter in the tick info and updates the liqudityNet
+Otherwise, it updates the liquidityGrossAfter in the tick info. If the liquidityGrossAfter moves from 0 to a value, then tick is added lower and updates the liqudityNet by adding to it. If the liquidityGrossAfter moves from a value to 0, then tick is removed upper and updates the liquidityNet by removing liquidity.
+
+The code below explains it, if liquidity is added upper, we are adding a negative liquidityNet otherwise, we are adding a positive liquidityNet.
 
 ```solidity
 

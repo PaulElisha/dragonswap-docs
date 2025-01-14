@@ -537,7 +537,7 @@ For a better implementation, refer to the LiquidityAmounts.sol library in the Dr
 
 These formulas allow for calculating liquidity within a specific price range for both token X and token Y, depending on whether the liquidity is being calculated using real or virtual reserves.
 
-Note: The same expression used to calculate the amount of tokens deposited is used to get the delta amounts. The difference is that it rounds up and is good for swap if we want to get the amountIn, we will go into the details in the swap section.
+Note: The same expression used to calculate the delta amount of token to deposit in order to shift the liquidity concentration from the current price to the target price. The difference is that it rounds up and is good for swap if we want to get the amountIn in a zeroForOne trade (that is, swap between ETH to USDC), we will go into the details in the swap section.
 
 ```solidity
     function getAmount0Delta(

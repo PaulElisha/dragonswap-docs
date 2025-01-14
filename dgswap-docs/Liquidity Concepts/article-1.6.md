@@ -132,9 +132,43 @@ In Dragonswap V2, when liquidity is provided, a position is created which can la
 
 The checkTick function checks the tick to determine valid tick.
 
-Checks if the liquidity computed which is the liquidityDelta, the liquidity to add, is not zero and if the current pool's tick is in the extreme range. Then it returns the amount0 equivalent for the liquidityDelta to add since the other token have been swapped out.
+Checks if the liquidity computed which is the liquidityDelta, the liquidity to add, is not zero and if the current pool's tick is in the extreme range. Then it returns the amount0 equivalent for the liquidityDelta to add since at the extreme price, the range is denominated in the other token.
 
-Then it checks if current pool's tick is in range by comparing against the upper bound tick.
+Then it checks if current pool's tick is in range.
+
+The amount0 is the amount0Delta of token0 to add when adding liquidty from the current price to the upperTick.
+The amount1 is the amount1Delta of token1 to add when adding liquidity from the lowerTick to the currentPrice.
+
+   ----->liquidity          ----->liquidity
+tickLower -----------currentTick------------tickUpper
+
+
+```solidity
+else if (_slot0.tick < params.tickUpper) {
+            // current tick is inside the passed range
+            uint128 liquidityBefore = liquidity; // SLOAD for gas optimization
+
+            // write an oracle entry
+            (slot0.observationIndex, slot0.observationCardinality) = observations.write(
+                _slot0.observationIndex,
+                _blockTimestamp(),
+                _slot0.tick,
+                liquidityBefore,
+                _slot0.observationCardinality,
+                _slot0.observationCardinalityNext
+            );
+
+            amount0 = SqrtPriceMath.getAmount0Delta(
+                _slot0.sqrtPriceX96,
+                TickMath.getSqrtRatioAtTick(params.tickUpper),
+                params.liquidityDelta
+            );
+            amount1 = SqrtPriceMath.getAmount1Delta(
+                TickMath.getSqrtRatioAtTick(params.tickLower),
+                _slot0.sqrtPriceX96,
+                params.liquidityDelta
+            );
+```
 
 If it is, the computed liquidity (liquidityDelta) is added to the current pool's liquidity ; that is what it means to modify a position.
 
@@ -145,7 +179,7 @@ liquidity = params.liquidityDelta < 0
                     ? liquidity - uint128(-params.liquidityDelta)
                     : liquidity + uint128(params.liquidityDelta);
 ```
-This checks if the liquidityDelta is negative, but if otherwise, it is positive, then it should add liquidityDelta.
+This checks if the liquidityDelta is negative (we want to remove liquidity), but if otherwise, it is positive, then it should add liquidityDelta.
 
 It is the same logic used here:
 

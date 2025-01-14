@@ -354,4 +354,46 @@ library UniswapV3Helpers {
             "Upper tick must be greater than lower tick"
         );
     }
+
+    function calculateNextInitializedTick(
+        uint160 currentPrice,
+        uint24 tickSpacing,
+        bool findNextAbove // true for next initialized tick above, false for below
+    ) external view returns (int24 nextInitializedTick) {
+        (int24 lowerTick, int24 upperTick) = calculateNextTicks(
+            currentPrice,
+            tickSpacing
+        );
+
+        // Initialize search variables
+        if (findNextAbove) {
+            // Search for the next initialized tick above the current tick
+            for (int24 tick = upperTick; ; tick += int24(tickSpacing)) {
+                if (isTickInitialized(tick)) {
+                    return tick;
+                }
+            }
+        } else {
+            // Search for the next initialized tick below the current tick
+            for (int24 tick = lowerTick; ; tick -= int24(tickSpacing)) {
+                if (isTickInitialized(tick)) {
+                    return tick;
+                }
+            }
+        }
+    }
+
+    function isTickInitialized(int24 tick) private view returns (bool) {
+        // Normalize the tick to a positive index for the bitmap
+        require(tick >= -887272 && tick <= 887272, "Tick out of bounds");
+
+        uint256 wordPosition = uint256(tick >> 8); // Divide by 256 to get word position
+        uint256 bitPosition = uint256(tick % 256); // Get the bit position within that word
+
+        // Retrieve the bitmap for that word position from the pool contract
+        uint256 bitmap = pool.tickBitmap(wordPosition);
+
+        // Check if the specific bit in the bitmap is set
+        return (bitmap & (1 << bitPosition)) != 0;
+    }
 }

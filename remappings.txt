@@ -1,0 +1,3 @@
+@dragonswap/v2-core/contracts/=lib/v2-core/contracts/
+forge-std/=lib/forge-std/src/
+v2-core/=lib/v2-core/contracts/

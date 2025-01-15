@@ -1,19 +1,19 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.0;
 
-import "v3-core/contracts/libraries/FixedPoint96.sol";
-import "v3-core/contracts/libraries/FullMath.sol";
-import "v3-core/contracts/interfaces/IUniswapV3Pool.sol";
+import "@dragonswap/v2-core/contracts/interfaces/IDragonswapV2Pool.sol";
+import "@dragonswap/v2-core/contracts/libraries/FixedPoint96.sol";
+import "@dragonswap/v2-core/contracts/libraries/FullMath.sol";
 import "./lib/Math.sol";
 
-library UniswapV3Helpers {
+library DgswapHelpers {
     /// @notice Calculate the amount of token Y (USDC) needed given token X (ETH) and price bounds.
     /// @param x The amount of token X (ETH) in units.
     /// @param sqrtPriceP The square root of the current price (√P) in Q96 format.
     /// @param sqrtPricePa The square root of the lower price bound (√Pa) in Q96 format.
     /// @param sqrtPricePb The square root of the upper price bound (√Pb) in Q96 format.
     /// @return y The required amount of token Y (USDC) in units.
-    function calculateUSDCAmount(
+    function calculateToken0Amount(
         uint256 x,
         uint160 sqrtPriceP,
         uint160 sqrtPricePa,
@@ -47,7 +47,7 @@ library UniswapV3Helpers {
     /// @param sqrtPricePa The square root of the lower price bound (√Pa) in Q96 format.
     /// @param sqrtPricePb The square root of the upper price bound (√Pb) in Q96 format.
     /// @return x The required amount of token X (ETH) in units.
-    function calculateETHAmount(
+    function calculateToken1Amount(
         uint256 y,
         uint160 sqrtPriceP,
         uint160 sqrtPricePa,

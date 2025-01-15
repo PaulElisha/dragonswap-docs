@@ -2,5 +2,7 @@
 src = "src"
 out = "out"
 libs = ["lib"]
-
+remappings = ['@dragonswap/v2-core/contracts/=lib/v2-core/contracts/']
+[profile.dragonswap]
+solc_version = "0.8.0"
 # See more config options https://github.com/foundry-rs/foundry/blob/master/crates/config/README.md#all-options
